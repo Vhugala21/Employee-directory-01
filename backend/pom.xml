@@ -29,6 +29,8 @@
 	<properties>
 		<tomcat.version>11.0.25</tomcat.version>
 		<java.version>21</java.version>
+		<maven.compiler.release>21</maven.compiler.release>
+		<testcontainers.version>1.20.1</testcontainers.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -55,27 +57,20 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- 
-		 * INTENTIONALLY VULNERABLE: Log4j 2.14.1 contains Log4Shell (CVE-2021-44228)
-		 * 
-		 * This version is vulnerable to remote code execution via JNDI lookup.
-		 * Spring Boot 3.x+ manages Log4j version via BOM - we're explicitly overriding
-		 * to an old version to simulate a real-world scenario where a transitive dependency
-		 * or manual version pin introduces a vulnerability.
-		 * 
-		 * SonarQube/OWASP Dependency Check will flag this.
-		 * Fix: Remove explicit version (let Spring Boot manage) or upgrade to 2.23.1+
-		 -->
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.14.1</version>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>2.14.1</version>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -84,19 +79,26 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.apache.logging.log4j</groupId>
-                            <artifactId>log4j-core</artifactId>
-                        </exclude>
-                        <exclude>
-                            <groupId>org.apache.logging.log4j</groupId>
-                            <artifactId>log4j-api</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
